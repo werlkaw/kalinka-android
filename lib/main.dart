@@ -49,10 +49,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> getData() async {
-    http.Response response = await http.get(
-      Uri.encodeFull("https://juan-tec-presentacion.appspot.com"),
+    http.Response response = await http.post(
+      Uri.encodeFull("https://juan-tec-presentacion.appspot.com/whatsapp"),
       headers: {
         "Accept": "application/json"
+      },
+      body: {
+        "From": "whatsapp:+16193652914",
+        "Body": "Hello world!"
       }
     );
 
