@@ -1,7 +1,11 @@
-import 'dart:async';
+import 'dart:developer' as developer;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:firebase_database/firebase_database.dart';
+
+import 'models/order.dart';
+import 'models/order_item.dart';
 
 void main() => runApp(MyApp());
 
@@ -46,34 +50,123 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class OrderWidget extends StatefulWidget {
 
-  Future<String> getData() async {
-    http.Response response = await http.post(
-      Uri.encodeFull("https://juan-tec-presentacion.appspot.com/whatsapp"),
-      headers: {
-        "Accept": "application/json"
-      },
-      body: {
-        "From": "whatsapp:+16193652914",
-        "Body": "Hello world!"
-      }
+  final Order order;
+
+  OrderWidget(this.order);
+
+  @override
+  _OrderWidgetState createState() => _OrderWidgetState();
+}
+
+class _OrderWidgetState extends State<OrderWidget> {
+  double _height = 0;
+  String dropdownValue = "Responder";
+
+  Row orderNameAndItems() {
+    StringBuffer itemsText = StringBuffer();
+    widget.order.items.forEach((orderItem) {
+      itemsText.writeln(orderItem.quantity.toString() +
+          ' ' +
+          orderItem.menuItem);
+    });
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            child: ListTile(
+              title: Text(widget.order.userName + " (" + widget.order.userId + ")"),
+              subtitle: Padding(
+                  child: Text(itemsText.toString()),
+                  padding: EdgeInsets.only(left: 10),
+              ),
+            ),
+          ),
+//          Container(
+//            width: 100,
+//            child: DropdownButton<String>(
+//              value: dropdownValue,
+//              icon: Icon(Icons.arrow_downward),
+//              iconSize: 24,
+//              elevation: 16,
+//              style: TextStyle(
+//                  color: Colors.deepPurple
+//              ),
+//              underline: Container(
+//                height: 2,
+//                color: Colors.deepPurpleAccent,
+//              ),
+//              onChanged: (String newValue) {
+//                setState(() {
+//                  dropdownValue = newValue;
+//                });
+//              },
+//              items: <String>[
+//                'Responder',
+//                'Su orden ya está lista!',
+//                'Su orden estará lista a las 2pm',
+//                'Su orden estará lista a las 11am mañana']
+//                  .map<DropdownMenuItem<String>>((String value) {
+//                return DropdownMenuItem<String>(
+//                  value: value,
+//                  child: Text(value),
+//                );
+//              })
+//                  .toList(),
+//            )
+//          ),
+        ]);
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: orderNameAndItems(),
+      color: Colors.amberAccent,
+      padding: EdgeInsets.fromLTRB(0, 5, 5, 0),
+      margin: EdgeInsets.only(bottom: 1)
     );
+  }
+}
 
-    print(response.body);
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+  List<Widget> orders = [];
+
+  _MyHomePageState() {
+    _updateList();
+    var updateListFunc = (Event event) {
+      developer.log(event.toString());
+      _updateList();
+    };
+    DatabaseReference orders =
+        FirebaseDatabase.instance.reference().child('orders');
+    orders.onChildChanged.listen(updateListFunc);
+    orders.onChildAdded.listen(updateListFunc);
+    orders.onChildMoved.listen(updateListFunc);
+    orders.onChildRemoved.listen(updateListFunc);
+
   }
 
-  List<Widget> _listElements() {
-    return <Widget>[
-      Container(
-        height: 30,
-        color: Colors.lightGreen
-      ),
-      Container(
-        height: 30,
-        color: Colors.lightBlue
-      )
-    ];
+  void _updateList() {
+    FirebaseDatabase.instance
+        .reference()
+        .child('orders')
+        .once()
+        .then((snapshot) {
+          developer.log(snapshot.value.toString());
+          List<OrderWidget> tmpOrders = [];
+          snapshot.value.keys.forEach((key) {
+            Order currentOrder = Order.fromMap(key, snapshot.value[key]);
+            if (currentOrder.completed) {
+              OrderWidget orderWidget = OrderWidget(currentOrder);
+              tmpOrders.add(orderWidget);
+            }
+          });
+          setState(() {
+            orders = tmpOrders;
+          });
+    });
   }
 
   @override
@@ -90,43 +183,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: ListView(
-        children: _listElements()
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: getData,
-        child: Icon(Icons.add)
-      ),
-//      body: Center(
-//        // Center is a layout widget. It takes a single child and positions it
-//        // in the middle of the parent.
-//        child: Column(
-//          // Column is also a layout widget. It takes a list of children and
-//          // arranges them vertically. By default, it sizes itself to fit its
-//          // children horizontally, and tries to be as tall as its parent.
-//          //
-//          // Invoke "debug painting" (press "p" in the console, choose the
-//          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-//          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-//          // to see the wireframe for each widget.
-//          //
-//          // Column has various properties to control how it sizes itself and
-//          // how it positions its children. Here we use mainAxisAlignment to
-//          // center the children vertically; the main axis here is the vertical
-//          // axis because Columns are vertical (the cross axis would be
-//          // horizontal).
-//          mainAxisAlignment: MainAxisAlignment.center,
-//          children: <Widget>[
-//            Text(
-//              'You have pushed the button this many times:',
-//            ),
-//            Text(
-//              '$_counter',
-//              style: Theme.of(context).textTheme.display1,
-//            ),
-//          ],
-//        ),
-//      ),
+      body: Container(
+        child: ListView(
+          children: orders,
+        ),
+        color: Colors.black12
+      )
     );
   }
 }

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "855287044707",
+    "firebase_url": "https://kalinka-74e69.firebaseio.com",
+    "project_id": "kalinka-74e69",
+    "storage_bucket": "kalinka-74e69.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:855287044707:android:117feab15c9ee62e1a3656",
+        "android_client_info": {
+          "package_name": "org.juanbustamante.kalinka_store"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "855287044707-s698b4js4r54rrl66ru6hvnkkoqe76a9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbplJ6V3ji1e8Kceaf2iz-gE-hh8fgPZg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "855287044707-s698b4js4r54rrl66ru6hvnkkoqe76a9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
