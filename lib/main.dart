@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import 'models/order.dart';
-import 'models/order_item.dart';
 
 void main() => runApp(MyApp());
 
